@@ -7,7 +7,7 @@
 
 */
 
-int tam = 0;
+int dimension = 0;
 
 /**
 
@@ -26,33 +26,41 @@ int count_qtd_upper_diag(int dimension)
     return sum;
 }
 
-void UPPER_DIAG_ROW (int m[][tam], int *v, int tam)
+void UPPER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
 	int i,k=1,j=0,diag=0;
 
-	for(i = 0 ; i < tam ; i++)
+	for(i = 0 ; i < (dimension*dimension+dimension)/2 ; i++)
 	{
  		if(v[i]==0)
-		 {  
+		{
+		 	//printf("acessando diagonal %d\t",diag);  
   			m[diag][diag]=v[i];
+  			//printf("posicao diag encontrada %d\t",m[diag][diag]);
+  			//printf("posicao do i = %d\t",i);
   			k=diag+1;
+  			//printf("novo k=%d\t",k);
   			j=diag;
+  			//printf("novo j=%d\n",j);
   			diag++;  
 		}
  		else
 		{
   			m[k][j]= v[i];
+  			//printf("posicao encontrada %d\t",m[k][j]);
   			m[j][k]= v[i];
+  			//printf("posicao inv encontrada %d\t",m[j][k]);
   			k++;
+  			//printf("novo k=%d\n",k);
  		}
 	}
 }
 
-void LOWER_DIAG_ROW (int m[][tam], int *v, int tam)
+void LOWER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
 	int i,k=0,j=0,diag=0;
 
-	for(i=0;i<(tam*tam+tam)/2;i++)
+	for(i=0;i<(dimension*dimension+dimension)/2;i++)
 	{
  		if(v[i]==0)
 		{  
@@ -70,17 +78,17 @@ void LOWER_DIAG_ROW (int m[][tam], int *v, int tam)
  	}
 }
 
-void UPPER_ROW (int m[][tam], int *v, int tam)
+void UPPER_ROW (int m[][dimension], int *v, int dimension)
 {
 	int i,k=0,j=1,diag=0;
 	
-	for(i=0;i<tam;i++)
+	for(i=0;i<dimension;i++)
 	{
 		m[i][i]=0;
 	}
-	for(i=0;i<tam*(tam-1)/2;i++)
+	for(i=0;i<dimension*(dimension-1)/2;i++)
 	{		
-		if(j==tam)
+		if(j==dimension)
 		{
 			j=diag+2;
 			k++;			
@@ -106,45 +114,44 @@ void readFile (char *path)
     }
 
     fscanf(arq, "%s %s", field, nome);
-    fscanf(arq, "%s %s %s", field, type, comment);
+    fscanf(arq, "%s %s", field, type);
+    fscanf(arq, "%s", field);
+ 	fgets(comment, 100, arq);
     fscanf(arq, "%s %d", field, &dimension);
     fscanf(arq, "%s %s", field, ewType);
     fscanf(arq, "%s %s", field, ewFormat);
     fscanf(arq, "%s %s", field, display);
     fscanf(arq, "%s", field);
     printf("NAME: %s\nTYPE: %s\nCOMMENT: %s\nDIMENSION: %d\nEDGE_WEIGHT_TYPE: %s\nEDGE_WEIGHT_FORMAT: %s\nDISPLAY_DATA_TYPE: %s\n", nome, type, comment, dimension, ewType, ewFormat, display);
+    printf("%s\n", field);
 
-    tam = count_qtd_upper_diag(dimension);
-    printf("%d", tam);
+    int tam = count_qtd_upper_diag(dimension);
+    printf("TAMANHO DO VETOR: %d\n\n", tam);
     int v[tam];
     int m[dimension][dimension];
 
     for(i = 0 ; i < tam ; i++)
     {
         fscanf(arq, "%d", &v[i]);
-        printf("%d\t", v[i]);
-    }
+    }  
     
-    printf("\n\nFIM VETOR\n\n");
+    LOWER_DIAG_ROW(m, v, dimension);
     
-    /*
-    UPPER_DIAG_ROW(m, v, tam);
-    for(i=0;i<tam;i++)
+    for(i=0;i<dimension;i++)
 	{
- 		for(j=0;j<tam;j++)
+ 		for(j=0;j<dimension;j++)
 		{
 			printf("%d\t",m[i][j]);
  	 	}
  		printf("\n");
 	}
-	*/
 
     fclose(arq);
 }
 
 int main()
 {
-    readFile("si175.tsp.txt");
+    readFile("gr24.tsp.txt");
 
     return 0;
 }
