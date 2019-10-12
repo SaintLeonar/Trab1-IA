@@ -173,6 +173,11 @@ void inicializaVcheck(int *vCheck)
     }
 }
 
+void visitCity(int *vCheck, int city)
+{
+    vCheck[city]++;
+}
+
 /**
 
     RETORNA O INDICE DA CIDADE MAIS PRÓXIMA DA CIDADE ATUAL
@@ -192,7 +197,6 @@ int buscaGulosa(int m[][dimension], int city, int *vCheck)
             cityVisited = i;
         }
     }
-    vCheck[cityVisited]++;
 
     return cityVisited;
 }
@@ -213,6 +217,7 @@ void busca(int m[][dimension])
     for(i = 0 ; i < dimension ; i++)
     {
         cityVisited = buscaGulosa(m, i, vCheck);
+        visitCity(vCheck, cityVisited);
         printf("\n==>Cidade visitada: %d\n", cityVisited);
         show_vCheck(vCheck);
     }
