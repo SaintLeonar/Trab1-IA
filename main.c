@@ -4,7 +4,7 @@
 
 /**
 
-	Variaveis Globais
+Variaveis Globais
 
 */
 
@@ -34,78 +34,81 @@ int setVetTam_UPPER_ROW(int dimension)
 
 void UPPER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
-	int i,k=1,j=0,diag=0;
+int i,k=1,j=0,diag=0;
 
-	for(i = 0 ; i < (dimension*dimension+dimension)/2 ; i++)
-	{
- 		if(v[i]==0)
-		{
-		 	//printf("acessando diagonal %d\t",diag);
-  			m[diag][diag]=v[i];
-  			//printf("posicao diag encontrada %d\t",m[diag][diag]);
-  			//printf("posicao do i = %d\t",i);
-  			k=diag+1;
-  			//printf("novo k=%d\t",k);
-  			j=diag;
-  			//printf("novo j=%d\n",j);
-  			diag++;
-		}
- 		else
-		{
-  			m[k][j]= v[i];
-  			//printf("posicao encontrada %d\t",m[k][j]);
-  			m[j][k]= v[i];
-  			//printf("posicao inv encontrada %d\t",m[j][k]);
-  			k++;
-  			//printf("novo k=%d\n",k);
- 		}
-	}
+for(i = 0 ; i < (dimension*dimension+dimension)/2 ; i++)
+{
+   if(v[i]==0)
+ {
+   //printf("acessando diagonal %d\t",diag);
+     m[diag][diag]=v[i];
+     //printf("posicao diag encontrada %d\t",m[diag][diag]);
+     //printf("posicao do i = %d\t",i);
+     k=diag+1;
+     //printf("novo k=%d\t",k);
+     j=diag;
+     //printf("novo j=%d\n",j);
+     diag++;
+ }
+   else
+ {
+     m[k][j]= v[i];
+     //printf("posicao encontrada %d\t",m[k][j]);
+     m[j][k]= v[i];
+     //printf("posicao inv encontrada %d\t",m[j][k]);
+     k++;
+     //printf("novo k=%d\n",k);
+   }
+}
 }
 
 void LOWER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
-	int i,k=0,j=0,diag=0;
+int i,k=0,j=0,diag=0;
 
-	for(i=0;i<(dimension*dimension+dimension)/2;i++)
-	{
- 		if(v[i]==0)
-		{
- 			m[diag][diag]=v[i];
- 		 	k=0;
- 		 	j=diag+1;
- 		 	diag++;
-		}
- 		else
-		{
-			m[k][j]= v[i];
-			m[j][k]= v[i];
-  			k++;
- 		}
+for(i=0;i<(dimension*dimension+dimension)/2;i++)
+{
+   if(v[i]==0)
+ {
+    m[diag][diag]=v[i];
+    printf("\nposicao da diagonal: %d\t",diag);
+     k=0;
+     j=diag+1;
+     printf("posicao do k: %d\n",k);
+     diag++;
+ }
+   else
+ {
+  m[k][j]= v[i];
+  m[j][k]= v[i];
+  printf("\nvalor da matriz=%d\tposicao do k: %d\tposicao do j%d\n",m[j][k],k,j);
+     k++;
+   }
 
- 		printf("%d\t", m[k][j]);
- 	}
+
+  }
 }
 
 void UPPER_ROW (int m[][dimension], int *v, int dimension)
 {
-	int i,k=0,j=1,diag=0;
+int i,k=0,j=1,diag=0;
 
-	for(i=0;i<dimension;i++)
-	{
-		m[i][i]=0;
-	}
-	for(i=0;i<dimension*(dimension-1)/2;i++)
-	{
-		if(j==dimension)
-		{
-			j=diag+2;
-			k++;
-			diag++;
-		}
-		m[j][k]=v[i];
-		m[k][j]=v[i];
-		j++;
-	}
+for(i=0;i<dimension;i++)
+{
+ m[i][i]=0;
+}
+for(i=0;i<dimension*(dimension-1)/2;i++)
+{
+ if(j==dimension)
+ {
+  j=diag+2;
+  k++;
+  diag++;
+ }
+ m[j][k]=v[i];
+ m[k][j]=v[i];
+ j++;
+}
 }
 
 /**
@@ -143,13 +146,13 @@ void showMat(int m[][dimension],int dimension)
     int i, j;
 
     for(i = 0 ; i < dimension ; i++)
-	{
- 		for(j = 0 ; j < dimension ; j++)
-		{
-			printf("%d ",m[i][j]);
- 	 	}
- 		printf("\n");
-	}
+{
+   for(j = 0 ; j < dimension ; j++)
+ {
+  printf("%d ",m[i][j]);
+    }
+   printf("\n");
+}
 }
 
 /**
@@ -225,9 +228,9 @@ void readFile (char *path)
             fscanf(arq, "%d", &v[i]);
         }
         showVet(v, tam);
-
-        //LOWER_DIAG_ROW(m, v, dimension);
-        //showMat(m, dimension);
+        printf("\n\n matriz formada\n\n");
+        LOWER_DIAG_ROW(m, v, dimension);
+        showMat(m, dimension);
     }
     else
         if(strstr(format, "UPPER_DIAG_ROW") != NULL)
@@ -240,9 +243,9 @@ void readFile (char *path)
                 fscanf(arq, "%d", &v[i]);
             }
             showVet(v, tam);
-
-            //UPPER_DIAG_ROW(m, v, dimension);
-            //showMat(m, dimension);
+            printf("\n\n matriz formada\n\n");
+            UPPER_DIAG_ROW(m, v, dimension);
+            showMat(m, dimension);
         }
     else
         if(strstr(format,"UPPER_ROW") != NULL)
@@ -255,9 +258,9 @@ void readFile (char *path)
                 fscanf(arq, "%d", &v[i]);
             }
             showVet(v, tam);
-
-            //UPPER_ROW(m, v, dimension);
-            //showMat(m, dimension);
+            printf("\n\n matriz formada\n\n");
+            UPPER_ROW(m, v, dimension);
+            showMat(m, dimension);
         }
 
     fclose(arq);
@@ -275,7 +278,7 @@ int main()
         >>> gr24.tsp.txt
     */
 
-    readFile("si175.tsp.txt");
+    readFile("gr24.tsp.txt");
 
     return 0;
 }
