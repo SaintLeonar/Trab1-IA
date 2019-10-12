@@ -40,24 +40,16 @@ for(i = 0 ; i < (dimension*dimension+dimension)/2 ; i++)
 {
    if(v[i]==0)
  {
-   //printf("acessando diagonal %d\t",diag);
      m[diag][diag]=v[i];
-     //printf("posicao diag encontrada %d\t",m[diag][diag]);
-     //printf("posicao do i = %d\t",i);
      k=diag+1;
-     //printf("novo k=%d\t",k);
      j=diag;
-     //printf("novo j=%d\n",j);
      diag++;
  }
    else
  {
      m[k][j]= v[i];
-     //printf("posicao encontrada %d\t",m[k][j]);
      m[j][k]= v[i];
-     //printf("posicao inv encontrada %d\t",m[j][k]);
      k++;
-     //printf("novo k=%d\n",k);
    }
 }
 }
@@ -66,49 +58,46 @@ void LOWER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
 int i,k=0,j=0,diag=0;
 
-for(i=0;i<(dimension*dimension+dimension)/2;i++)
-{
-   if(v[i]==0)
- {
-    m[diag][diag]=v[i];
-    printf("\nposicao da diagonal: %d\t",diag);
-     k=0;
-     j=diag+1;
-     printf("posicao do k: %d\n",k);
-     diag++;
- }
-   else
- {
-  m[k][j]= v[i];
-  m[j][k]= v[i];
-  printf("\nvalor da matriz=%d\tposicao do k: %d\tposicao do j%d\n",m[j][k],k,j);
-     k++;
-   }
+    for(i=0;i<(dimension*dimension+dimension)/2;i++)
+    {
+        if(v[i]==0)
+        {
+            m[diag][diag]=v[i];
+            k=0;
+            j=diag+1;
+            diag++;
+        }
+        else
+        {
+            m[k][j]= v[i];
+            m[j][k]= v[i];
+            k++;
+        }
 
 
-  }
+    }
 }
 
 void UPPER_ROW (int m[][dimension], int *v, int dimension)
 {
-int i,k=0,j=1,diag=0;
+    int i,k=0,j=1,diag=0;
 
-for(i=0;i<dimension;i++)
-{
- m[i][i]=0;
-}
-for(i=0;i<dimension*(dimension-1)/2;i++)
-{
- if(j==dimension)
- {
-  j=diag+2;
-  k++;
-  diag++;
- }
- m[j][k]=v[i];
- m[k][j]=v[i];
- j++;
-}
+    for(i=0;i<dimension;i++)
+    {
+        m[i][i]=0;
+    }
+    for(i=0;i<dimension*(dimension-1)/2;i++)
+    {
+        if(j==dimension)
+        {
+            j=diag+2;
+            k++;
+            diag++;
+        }
+        m[j][k]=v[i];
+        m[k][j]=v[i];
+        j++;
+    }
 }
 
 /**
@@ -141,18 +130,93 @@ void showVet(int *v,int tam)
     PRINTA A MATRIZ
 
 */
-void showMat(int m[][dimension],int dimension)
+void showMat(int m[][dimension])
 {
     int i, j;
+    printf("\n");
+    for(i = 0 ; i < dimension ; i++)
+    {
+        for(j = 0 ; j < dimension ; j++)
+        {
+            printf("%d  ",m[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void show_vCheck(int *vCheck)
+{
+    int i;
+
+    printf("\nvCheck:\n");
+    for(i = 0 ; i < dimension ; i++)
+    {
+        printf("%d  ", vCheck[i]);
+    }
+    printf("\n");
+}
+
+/**
+
+    vCheck é o vetor responsável por checar as cidades que já foram visitadas
+    Toda cidade inicializa com valor -1
+    Ao ser visitada soma 1, passando a ser 0
+    A busca termina quando todas as posições de vCheck forem = 0
+
+*/
+void inicializaVcheck(int *vCheck)
+{
+    int i;
+    for(i = 0 ; i < dimension ; i++)
+    {
+        vCheck[i] = -1;
+    }
+}
+
+/**
+
+    RETORNA O INDICE DA CIDADE MAIS PRÓXIMA DA CIDADE ATUAL
+    E MARCA COMO VISITADA (vCheck[cityVisited]++)
+
+*/
+int buscaGulosa(int m[][dimension], int city, int *vCheck)
+{
+    int menorDist = 999999, i, cityVisited = -1;
+    for(i = 0 ; i < dimension ; i++)
+    {
+        if(i == city || vCheck[i]==0){continue;}
+
+        if(m[city][i] < menorDist)
+        {
+            menorDist = m[city][i];
+            cityVisited = i;
+        }
+    }
+    vCheck[cityVisited]++;
+
+    return cityVisited;
+}
+
+/**
+
+    AQUI É ONDE VAMOS CHAMAR AS FUNÇÕES METAHEURISTICAS
+
+*/
+void busca(int m[][dimension])
+{
+    int vCheck[dimension], i, cityVisited;
+
+    inicializaVcheck(vCheck);
+    printf("\n==>Nenhuma cidade visitada\n");
+    show_vCheck(vCheck);
 
     for(i = 0 ; i < dimension ; i++)
-{
-   for(j = 0 ; j < dimension ; j++)
- {
-  printf("%d ",m[i][j]);
+    {
+        cityVisited = buscaGulosa(m, i, vCheck);
+        printf("\n==>Cidade visitada: %d\n", cityVisited);
+        show_vCheck(vCheck);
     }
-   printf("\n");
-}
+
 }
 
 /**
@@ -227,10 +291,10 @@ void readFile (char *path)
         {
             fscanf(arq, "%d", &v[i]);
         }
-        showVet(v, tam);
-        printf("\n\n matriz formada\n\n");
         LOWER_DIAG_ROW(m, v, dimension);
-        showMat(m, dimension);
+        //showMat(m);
+        busca(m);
+
     }
     else
         if(strstr(format, "UPPER_DIAG_ROW") != NULL)
@@ -242,10 +306,10 @@ void readFile (char *path)
             {
                 fscanf(arq, "%d", &v[i]);
             }
-            showVet(v, tam);
-            printf("\n\n matriz formada\n\n");
             UPPER_DIAG_ROW(m, v, dimension);
-            showMat(m, dimension);
+            //showMat(m);
+            busca(m);
+
         }
     else
         if(strstr(format,"UPPER_ROW") != NULL)
@@ -257,10 +321,10 @@ void readFile (char *path)
             {
                 fscanf(arq, "%d", &v[i]);
             }
-            showVet(v, tam);
-            printf("\n\n matriz formada\n\n");
             UPPER_ROW(m, v, dimension);
-            showMat(m, dimension);
+            //showMat(m);
+            busca(m);
+
         }
 
     fclose(arq);
