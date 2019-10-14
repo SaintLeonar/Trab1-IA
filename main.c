@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <stdbool.h>
 
 /**
 
@@ -30,6 +32,40 @@ int setVetTam_Diag(int dimension)
 int setVetTam_UPPER_ROW(int dimension)
 {
     return (dimension*(dimension-1)/2);
+}
+
+bool exists(int val, int *v, int tam)
+{
+    int i;
+
+    for(i = 0 ; i < tam ; i++)
+    {
+        if(v[i] == val)
+            return true;
+    }
+    return false;
+}
+/**
+
+    GERA UM VETOR DE NUMEROS ALEATÓRIOS
+
+*/
+void setVetRandom(int *vRandom)
+{
+    srand(time(NULL));
+    int i, val;
+    vRandom[0] = 0;
+
+    for(i = 1 ; i < dimension ; i++)
+    {
+        val = rand() % dimension;
+        while(exists(val, vRandom, i))
+        {
+            val = rand() % dimension;
+        }
+
+        vRandom[i] = val;
+    }
 }
 
 /**
@@ -116,6 +152,16 @@ void showInfo(char *str)
     printf("%s", str);
 }
 
+void show_vRandom(int *v,int tam)
+{
+    int i;
+
+    for(i = 1 ; i < tam ; i++)
+    {
+        printf("%d ", v[i]);
+    }
+}
+
 /**
 
     PRINTA UM VETOR
@@ -193,7 +239,8 @@ void visitCity(int *vCheck, int city)
 
 /**
 
-    RETORNA O INDICE DA CIDADE MAIS PRÓXIMA DA CIDADE ATUAL
+    REALIZA 1 PASSO DA BUSCA GULOSA
+    RETORNA O INDICE DA CIDADE MAIS PRÓXIMA NÃO VISITADA DA CIDADE ATUAL
     E MARCA COMO VISITADA (vCheck[cityVisited]++)
 
 */
@@ -202,7 +249,7 @@ int passoGuloso(int m[][dimension], int city, int *vCheck)
     int menorDist = 999999, i, cityVisited = -1;
     for(i = 0 ; i < dimension ; i++)
     {
-        if(i == city || vCheck[i]==0){continue;}
+        if(i == city){continue;}
 
         if(m[city][i] < menorDist)
         {
@@ -222,7 +269,7 @@ int passoGuloso(int m[][dimension], int city, int *vCheck)
 int getCusto(int *vDist)
 {
     int i, sum = 0;
-    for(i = 0 ; i < dimension ; i++)
+    for(i = 0 ; i < dimension-1 ; i++)
     {
         sum = sum + vDist[i];
     }
@@ -253,6 +300,29 @@ void buscaGulosa(int m[][dimension])
     custo = getCusto(vDist);
     printf("\n\n[BUSCA GULOSA] Custo total: %d\n", custo);
 }
+/**
+
+    BUSCA META-HEURÍSTICA: Simulated Annealing
+
+*/
+void simulatedAnnealing(int m[][dimension])
+{
+    int i, custo, vDist[dimension], vRandom[dimension], j = 0;
+
+    inicializaVetor(vDist, dimension);
+    inicializaVetor(vRandom, dimension);
+    setVetRandom(vRandom);
+
+    for(i = 1 ; i < dimension ; i++)
+    {
+        vDist[i-1] = m[j][vRandom[i]];
+        j = vRandom[i];
+    }
+    printf("\n[SIMULATED ANNEALING] Distancias percorridas: ");
+    showVet(vDist, dimension-1);
+    custo = getCusto(vDist);
+    printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", custo);
+}
 
 /**
 
@@ -262,6 +332,7 @@ void buscaGulosa(int m[][dimension])
 void busca(int m[][dimension])
 {
     buscaGulosa(m);
+    simulatedAnnealing(m);
 }
 
 /**

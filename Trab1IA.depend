@@ -1,6 +1,8 @@
 # depslib dependency file v1.0
-1571016214 source:d:\documentos\inteligência artificial\trab1ia\main.c
+1571033535 source:d:\documentos\inteligência artificial\trab1ia\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<time.h>
+	<stdbool.h>
 
