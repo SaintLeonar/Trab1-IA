@@ -32,6 +32,12 @@ int setVetTam_UPPER_ROW(int dimension)
     return (dimension*(dimension-1)/2);
 }
 
+/**
+
+    UPPER_DIAG_ROW, LOWER_DIAG_ROW E UPPER_ROW
+    ORGANIZAM A MATRIZ DE ADJACÊNCIAS
+
+*/
 void UPPER_DIAG_ROW (int m[][dimension], int *v, int dimension)
 {
 int i,k=1,j=0,diag=0;
@@ -112,7 +118,7 @@ void showInfo(char *str)
 
 /**
 
-    PRINTA O VETOR
+    PRINTA UM VETOR
 
 */
 void showVet(int *v,int tam)
@@ -121,13 +127,13 @@ void showVet(int *v,int tam)
 
     for(i = 0 ; i < tam ; i++)
     {
-        printf("%d\t", v[i]);
+        printf("%d ", v[i]);
     }
 }
 
 /**
 
-    PRINTA A MATRIZ
+    PRINTA A MATRIZ DE ADJACÊNCIAS
 
 */
 void showMat(int m[][dimension])
@@ -144,6 +150,11 @@ void showMat(int m[][dimension])
     }
 }
 
+/**
+
+    [DEBUG] PRINTA O vCheck
+
+*/
 void show_vCheck(int *vCheck)
 {
     int i;
@@ -151,28 +162,30 @@ void show_vCheck(int *vCheck)
     printf("\nvCheck:\n");
     for(i = 0 ; i < dimension ; i++)
     {
-        printf("%d  ", vCheck[i]);
+        printf("%d ", vCheck[i]);
     }
     printf("\n");
 }
 
 /**
 
-    vCheck é o vetor responsável por checar as cidades que já foram visitadas
-    Toda cidade inicializa com valor -1
-    Ao ser visitada soma 1, passando a ser 0
-    A busca termina quando todas as posições de vCheck forem = 0
+    INICIALIZA UM VETOR COM -1
 
 */
-void inicializaVcheck(int *vCheck)
+void inicializaVetor(int *v, int tam)
 {
     int i;
-    for(i = 0 ; i < dimension ; i++)
+    for(i = 0 ; i < tam ; i++)
     {
-        vCheck[i] = -1;
+        v[i] = -1;
     }
 }
 
+/**
+
+    VISITA CIDADE DÃã
+
+*/
 void visitCity(int *vCheck, int city)
 {
     vCheck[city]++;
@@ -184,7 +197,7 @@ void visitCity(int *vCheck, int city)
     E MARCA COMO VISITADA (vCheck[cityVisited]++)
 
 */
-int buscaGulosa(int m[][dimension], int city, int *vCheck)
+int passoGuloso(int m[][dimension], int city, int *vCheck)
 {
     int menorDist = 999999, i, cityVisited = -1;
     for(i = 0 ; i < dimension ; i++)
@@ -203,25 +216,52 @@ int buscaGulosa(int m[][dimension], int city, int *vCheck)
 
 /**
 
+    RETORNA O CUSTO DE UM VETOR DE DISTANCIAS
+
+*/
+int getCusto(int *vDist)
+{
+    int i, sum = 0;
+    for(i = 0 ; i < dimension ; i++)
+    {
+        sum = sum + vDist[i];
+    }
+
+    return sum;
+}
+
+/**
+
+    BUSCA GULOSA
+
+*/
+void buscaGulosa(int m[][dimension])
+{
+    int i, vCheck[dimension], cityVisited, custo, vDist[dimension];
+
+    inicializaVetor(vCheck, dimension);
+    inicializaVetor(vDist, dimension);
+
+    for(i = 0 ; i < dimension ; i++)
+    {
+        cityVisited = passoGuloso(m, i, vCheck);
+        visitCity(vCheck, cityVisited);
+        vDist[i] = m[i][cityVisited];
+    }
+    printf("\n[BUSCA GULOSA] Distancias percorridas: ");
+    showVet(vDist, dimension);
+    custo = getCusto(vDist);
+    printf("\n\n[BUSCA GULOSA] Custo total: %d\n", custo);
+}
+
+/**
+
     AQUI É ONDE VAMOS CHAMAR AS FUNÇÕES METAHEURISTICAS
 
 */
 void busca(int m[][dimension])
 {
-    int vCheck[dimension], i, cityVisited;
-
-    inicializaVcheck(vCheck);
-    printf("\n==>Nenhuma cidade visitada\n");
-    show_vCheck(vCheck);
-
-    for(i = 0 ; i < dimension ; i++)
-    {
-        cityVisited = buscaGulosa(m, i, vCheck);
-        visitCity(vCheck, cityVisited);
-        printf("\n==>Cidade visitada: %d\n", cityVisited);
-        show_vCheck(vCheck);
-    }
-
+    buscaGulosa(m);
 }
 
 /**
@@ -342,7 +382,7 @@ int main()
 
         >>> brazil58.tsp.txt
         >>> gr120.tsp.txt
-        >>> hk58.tsp.txt
+        >>> hk48.tsp.txt
         >>> si175.tsp.txt
         >>> gr24.tsp.txt
     */
