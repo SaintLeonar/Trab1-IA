@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
+#include <windows.h>
 
 /**
 
@@ -198,23 +199,6 @@ void showMat(int m[][dimension])
 
 /**
 
-    [DEBUG] PRINTA O vCheck
-
-*/
-void show_vCheck(int *vCheck)
-{
-    int i;
-
-    printf("\nvCheck:\n");
-    for(i = 0 ; i < dimension ; i++)
-    {
-        printf("%d ", vCheck[i]);
-    }
-    printf("\n");
-}
-
-/**
-
     INICIALIZA UM VETOR COM -1
 
 */
@@ -229,36 +213,17 @@ void inicializaVetor(int *v, int tam)
 
 /**
 
-    VISITA CIDADE DÃã
+    FAZ A COPIA DE UM VETOR
 
 */
-void visitCity(int *vCheck, int city)
+void vetcpy(int *dest, int *orig, int tam)
 {
-    vCheck[city]++;
-}
+    int i;
 
-/**
-
-    REALIZA 1 PASSO DA BUSCA GULOSA
-    RETORNA O INDICE DA CIDADE MAIS PRÓXIMA NÃO VISITADA DA CIDADE ATUAL
-    E MARCA COMO VISITADA (vCheck[cityVisited]++)
-
-*/
-int passoGuloso(int m[][dimension], int city, int *vCheck)
-{
-    int menorDist = 999999, i, cityVisited = -1;
-    for(i = 0 ; i < dimension ; i++)
+    for(i = 0 ; i < tam ; i++)
     {
-        if(i == city){continue;}
-
-        if(m[city][i] < menorDist)
-        {
-            menorDist = m[city][i];
-            cityVisited = i;
-        }
+        dest[i] = orig[i];
     }
-
-    return cityVisited;
 }
 
 /**
@@ -269,7 +234,7 @@ int passoGuloso(int m[][dimension], int city, int *vCheck)
 int getCusto(int *vDist)
 {
     int i, sum = 0;
-    for(i = 0 ; i < dimension-1 ; i++)
+    for(i = 0 ; i < dimension ; i++)
     {
         sum = sum + vDist[i];
     }
@@ -279,49 +244,47 @@ int getCusto(int *vDist)
 
 /**
 
-    BUSCA GULOSA
-
-*/
-void buscaGulosa(int m[][dimension])
-{
-    int i, vCheck[dimension], cityVisited, custo, vDist[dimension];
-
-    inicializaVetor(vCheck, dimension);
-    inicializaVetor(vDist, dimension);
-
-    for(i = 0 ; i < dimension ; i++)
-    {
-        cityVisited = passoGuloso(m, i, vCheck);
-        visitCity(vCheck, cityVisited);
-        vDist[i] = m[i][cityVisited];
-    }
-    printf("\n[BUSCA GULOSA] Distancias percorridas: ");
-    showVet(vDist, dimension);
-    custo = getCusto(vDist);
-    printf("\n\n[BUSCA GULOSA] Custo total: %d\n", custo);
-}
-/**
-
     BUSCA META-HEURÍSTICA: Simulated Annealing
 
 */
 void simulatedAnnealing(int m[][dimension])
 {
-    int i, custo, vDist[dimension], vRandom[dimension], j = 0;
+    int i, custo, vDist[dimension], vRandom[dimension], j = 0, k, vAux[dimension], menorCusto = 9999999;
+    int nParada = 10000;
 
     inicializaVetor(vDist, dimension);
     inicializaVetor(vRandom, dimension);
+    inicializaVetor(vAux, dimension);
     setVetRandom(vRandom);
 
-    for(i = 1 ; i < dimension ; i++)
+    for(k = 0 ; k < nParada ; k++)
     {
-        vDist[i-1] = m[j][vRandom[i]];
-        j = vRandom[i];
+        printf("==> Tentativa numero: %d\n\n", k);
+        setVetRandom(vRandom);
+
+        for(i = 1 ; i < dimension ; i++)
+        {
+            vAux[i-1] = m[j][vRandom[i]];
+            j = vRandom[i];
+        }
+        vAux[dimension-1] = m[j][0]; // ULTIMA POSIÇÃO ==> DISTANCIA DA ULTIMA CIDADE VISITADA ATÉ A CIDADE ORIGINAL
+        custo = getCusto(vAux);
+        if(custo < menorCusto)
+        {
+            menorCusto = custo;
+            vetcpy(vDist, vAux, dimension);
+        }
+
+        printf("\n[SIMULATED ANNEALING] Distancias percorridas: ");
+        showVet(vDist, dimension);
+        printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", menorCusto);
+        system("cls");
     }
+    printf("==> Tentativa numero: %d\n\n", k);
     printf("\n[SIMULATED ANNEALING] Distancias percorridas: ");
-    showVet(vDist, dimension-1);
-    custo = getCusto(vDist);
-    printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", custo);
+    showVet(vDist, dimension);
+    printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", menorCusto);
+
 }
 
 /**
@@ -331,7 +294,6 @@ void simulatedAnnealing(int m[][dimension])
 */
 void busca(int m[][dimension])
 {
-    buscaGulosa(m);
     simulatedAnnealing(m);
 }
 
@@ -378,6 +340,7 @@ int getDim_Format(FILE *arq, char *format)
             format[cPos] = '\0';
         }
     }
+    //Sleep(5000);
 
     return dimension;
 }
