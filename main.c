@@ -4,12 +4,13 @@
 #include <time.h>
 #include <stdbool.h>
 #include <windows.h>
-
 /**
 
 Variaveis Globais
 
 */
+
+void menu();
 
 int dimension = 0;
 
@@ -35,6 +36,11 @@ int setVetTam_UPPER_ROW(int dimension)
     return (dimension*(dimension-1)/2);
 }
 
+/**
+
+    VERIFICA SE UM DETERMINADO VALOR ESTA CONTIDO EM UM VETOR
+
+*/
 bool exists(int val, int *v, int tam)
 {
     int i;
@@ -153,16 +159,6 @@ void showInfo(char *str)
     printf("%s", str);
 }
 
-void show_vRandom(int *v,int tam)
-{
-    int i;
-
-    for(i = 1 ; i < tam ; i++)
-    {
-        printf("%d ", v[i]);
-    }
-}
-
 /**
 
     PRINTA UM VETOR
@@ -249,8 +245,15 @@ int getCusto(int *vDist)
 */
 void simulatedAnnealing(int m[][dimension])
 {
-    int i, custo, vDist[dimension], vRandom[dimension], j = 0, k, vAux[dimension], menorCusto = 9999999;
-    int nParada = 10000;
+    int custo, vDist[dimension], vRandom[dimension], vAux[dimension], route[dimension], controle = 0;
+    int nParada = 50000, menorCusto = 9999999;
+    int i, k, j = 0;
+    int retMenu = -1;
+    clock_t iniTempo = 0;
+    clock_t fimTempo;
+    double tempoCPU;
+
+    system("cls");
 
     inicializaVetor(vDist, dimension);
     inicializaVetor(vRandom, dimension);
@@ -259,42 +262,63 @@ void simulatedAnnealing(int m[][dimension])
 
     for(k = 0 ; k < nParada ; k++)
     {
-        printf("==> Tentativa numero: %d\n\n", k);
-        setVetRandom(vRandom);
+        printf("==> Tentativa numero: %d\n==> Controle: %d\n\n", k, controle);
+        setVetRandom(vRandom); // GERA UMA ROTA ALEATORIA
 
         for(i = 1 ; i < dimension ; i++)
         {
-            vAux[i-1] = m[j][vRandom[i]];
-            j = vRandom[i];
+            vAux[i-1] = m[j][vRandom[i]]; //PEGA AS DISTANCIAS DA ROTA ALEATORIA
+            j = vRandom[i]; // j = CIDADE VISITADA
         }
+        vRandom[dimension-1] = 0; // ULTIMA CIDADE ==> CIDADE INICIAL
         vAux[dimension-1] = m[j][0]; // ULTIMA POSIÇÃO ==> DISTANCIA DA ULTIMA CIDADE VISITADA ATÉ A CIDADE ORIGINAL
-        custo = getCusto(vAux);
+        custo = getCusto(vAux); // CALCULA DO CUSTO DA ROTA
+
+        printf("(!) Busca parcial: \n");
+
+        printf("\n[SIMULATED ANNEALING] Rota Percorrida: ");
+        showVet(vRandom, dimension);
+        printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", custo);
+        printf("_________________________________________________________________________________________________________");
+
+        // VERIFICA SE CUSTO ATUAL É MENOR QUE O ANTERIOR
         if(custo < menorCusto)
         {
+            //SE FOR MENOR ATUALIZA A ROTA E O CUSTO
             menorCusto = custo;
-            vetcpy(vDist, vAux, dimension);
+            vetcpy(route, vRandom, dimension);
+            controle = 0;
+        }
+        else{controle++;}
+
+        if(controle == 1000)
+        {
+            system("cls");
+
+            break;
         }
 
-        printf("\n[SIMULATED ANNEALING] Distancias percorridas: ");
-        showVet(vDist, dimension);
+        printf("\n\n(!) Melhor rota ate agora: \n");
+
+        printf("\n[SIMULATED ANNEALING] Rota Percorrida: ");
+        showVet(route, dimension);
         printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", menorCusto);
         system("cls");
     }
+    fimTempo = clock();
+    tempoCPU = ((double) (fimTempo - iniTempo)) / CLOCKS_PER_SEC; // CALCULA O TEMPO DE EXECUÇÃO DA BUSCA
+
     printf("==> Tentativa numero: %d\n\n", k);
-    printf("\n[SIMULATED ANNEALING] Distancias percorridas: ");
-    showVet(vDist, dimension);
+    printf("\n\n[SIMULATED ANNEALING] Rota Percorrida: ");
+    showVet(route, dimension);
     printf("\n\n[SIMULATED ANNEALING] Custo total: %d\n\n", menorCusto);
+    printf("[SIMULATED ANNEALING] Tempo cronometrado: %f segundos\n", tempoCPU);
 
-}
+    printf("\n(1)    : SIM\n(ELSE) : NAO\n\n==>Deseja retornar ao menu principal? ");
+    scanf("%d", &retMenu);
+    if(retMenu == 1)
+        menu();
 
-/**
-
-    AQUI É ONDE VAMOS CHAMAR AS FUNÇÕES METAHEURISTICAS
-
-*/
-void busca(int m[][dimension])
-{
-    simulatedAnnealing(m);
 }
 
 /**
@@ -340,14 +364,15 @@ int getDim_Format(FILE *arq, char *format)
             format[cPos] = '\0';
         }
     }
-    //Sleep(5000);
+
+    printf("_________________________________________________________________________________________________________\n");
 
     return dimension;
 }
 
 void readFile (char *path)
 {
-    int i, tam = 0;
+    int escolha = -1, i, tam = 0;
     char format[15];
     strcpy(format, "");
 
@@ -371,9 +396,22 @@ void readFile (char *path)
             fscanf(arq, "%d", &v[i]);
         }
         LOWER_DIAG_ROW(m, v, dimension);
-        //showMat(m);
-        busca(m);
+        printf("\n\n(1)    : Simulated Annealing\n(2)    : Iterated Local Search\n(ELSE) : Voltar\n\n==>Qual algoritmo de busca deseja utilizar? ");
+            scanf("%d", &escolha);
+            switch(escolha)
+            {
+                case 1 :
+                    simulatedAnnealing(m);
+                    break;
 
+                case 2 :
+                    printf("VOCE CHAMOU O Iterated Local Search!\n");
+                    // YURI CHAMA A FUNÇÃO ILS AQUI <===
+                    break;
+                default :
+                    menu();
+                    break;
+            }
     }
     else
         if(strstr(format, "UPPER_DIAG_ROW") != NULL)
@@ -386,9 +424,23 @@ void readFile (char *path)
                 fscanf(arq, "%d", &v[i]);
             }
             UPPER_DIAG_ROW(m, v, dimension);
-            //showMat(m);
-            busca(m);
 
+            printf("\n\n(1)    : Simulated Annealing\n(2)    : Iterated Local Search\n(ELSE) : Voltar\n\n==>Qual algoritmo de busca deseja utilizar? ");
+            scanf("%d", &escolha);
+            switch(escolha)
+            {
+                case 1 :
+                    simulatedAnnealing(m);
+                    break;
+
+                case 2 :
+                    printf("VOCE CHAMOU O Iterated Local Search!\n");
+                    // YURI CHAMA A FUNÇÃO ILS AQUI <===
+                    break;
+                default :
+                    menu();
+                    break;
+            }
         }
     else
         if(strstr(format,"UPPER_ROW") != NULL)
@@ -401,27 +453,74 @@ void readFile (char *path)
                 fscanf(arq, "%d", &v[i]);
             }
             UPPER_ROW(m, v, dimension);
-            //showMat(m);
-            busca(m);
 
+            printf("\n\n(1)    : Simulated Annealing\n(2)    : Iterated Local Search\n(ELSE) : Voltar\n\n==>Qual algoritmo de busca deseja utilizar? ");
+            scanf("%d", &escolha);
+            switch(escolha)
+            {
+                case 1 :
+                    simulatedAnnealing(m);
+                    break;
+
+                case 2 :
+                    printf("VOCE CHAMOU O Iterated Local Search!\n");
+                    // YURI CHAMA A FUNÇÃO ILS AQUI <===
+                    break;
+                default :
+                    menu();
+                    break;
+            }
         }
 
     fclose(arq);
 }
 
+void menu()
+{
+    int escolha = -1;
+    char *file1 = "brazil58.tsp.txt", *file2 = "gr120.tsp.txt", *file3 = "hk48.tsp.txt", *file4 = "si175.tsp.txt", *file5 = "gr24.tsp.txt";
+
+    system("cls");
+
+    printf("(1) : brazil58.tsp.txt\n(2) : gr120.tsp.txt\n(3) : hk48.tsp.txt\n(4) : si175.tsp.txt\n(5) : gr24.tsp.txt\n\n==>Qual algoritmo de busca deseja utilizar?\n");
+    scanf("%d", &escolha);
+
+    switch(escolha)
+    {
+        case 1 :
+            printf("VOCE ESCOLHEU O ARQUIVO: %s\n\n", file1);
+            system("cls");
+            readFile(file1);
+            break;
+        case 2 :
+            printf("VOCE ESCOLHEU O ARQUIVO: %s\n\n", file2);
+            system("cls");
+            readFile(file2);
+            break;
+        case 3 :
+            printf("VOCE ESCOLHEU O ARQUIVO: %s\n\n", file3);
+            system("cls");
+            readFile(file3);
+            break;
+        case 4 :
+            printf("VOCE ESCOLHEU O ARQUIVO: %s\n\n", file4);
+            system("cls");
+            readFile(file4);
+            break;
+        case 5 :
+            printf("VOCE ESCOLHEU O ARQUIVO: %s\n\n", file5);
+            system("cls");
+            readFile(file5);
+            break;
+        default :
+            system("cls");
+            menu();
+    }
+}
+
 int main()
 {
-    /**
-        (!) ESCOLHA O ARQUIVO AQUI
-
-        >>> brazil58.tsp.txt
-        >>> gr120.tsp.txt
-        >>> hk48.tsp.txt
-        >>> si175.tsp.txt
-        >>> gr24.tsp.txt
-    */
-
-    readFile("gr24.tsp.txt");
+    menu();
 
     return 0;
 }
